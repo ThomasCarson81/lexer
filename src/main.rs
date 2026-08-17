@@ -4,6 +4,12 @@ use std::fs;
 use std::iter::Peekable;
 use std::str::Chars;
 
+#[derive(Debug)]
+enum LexError {
+    InvalidCharacter(char, usize),
+    InvalidNumberFormat(String, usize),
+    CouldNotReadFile(String),
+}
 struct Token {
     token_type: TokenType,
     lexeme: String,
@@ -74,28 +80,49 @@ fn main() {
         );
         return;
     }
+    let tokens = match lex_file(&args[1]) {
+        Ok(tokens) => tokens,
+        Err(e) => {
+            match e {
+                LexError::InvalidCharacter(c, line) => {
+                    println!("Line {}: Invalid character: '{}'", line, c);
+                }
+                LexError::InvalidNumberFormat(num, line) => {
+                    println!("Line {}: Invalid number format: {}", line, num);
+                }
+                LexError::CouldNotReadFile(msg) => {
+                    println!("Could not read file: {}", msg);
+                }
+            }
+            return;
+        }
+    };
+    if args.len() == 3 {
+        output_tokens(&tokens, &args[2]);
+    } else {
+        print_tokens(&tokens);
+    }
+}
+
+fn lex_file(file_path: &str) -> Result<Vec<Token>, LexError> {
     let mut all_tokens: Vec<Token> = Vec::new();
-    let file_content = fs::read_to_string(&args[1]).expect("failed to read file");
+    let file_content =
+        fs::read_to_string(&file_path).map_err(|e| LexError::CouldNotReadFile(e.to_string()))?;
     let content_lines = file_content.lines();
     let total_lines = content_lines.clone().count();
     for (i, line) in content_lines.enumerate() {
-        all_tokens.extend(parse_line(line, i + 1).unwrap());
+        all_tokens.extend(lex_line(line, i + 1)?);
     }
     all_tokens.push(Token {
         token_type: TokenType::EndOfFile,
         lexeme: "".to_owned(),
         line: total_lines,
     });
-    parse_keywords(&mut all_tokens);
-
-    if args.len() == 3 {
-        output_tokens(&all_tokens, &args[2]);
-    } else {
-        print_tokens(&all_tokens);
-    }
+    lex_keywords(&mut all_tokens);
+    Ok(all_tokens)
 }
 
-fn parse_line(line: &str, line_number: usize) -> Result<Vec<Token>, String> {
+fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut chars = line.chars().peekable();
     while let Some(&c) = chars.peek() {
@@ -104,7 +131,7 @@ fn parse_line(line: &str, line_number: usize) -> Result<Vec<Token>, String> {
                 chars.next();
             }
             'a'..='z' | 'A'..='Z' => {
-                let identifier = parse_identifier(&mut chars);
+                let identifier = lex_identifier(&mut chars);
                 tokens.push(Token {
                     token_type: TokenType::Identifier,
                     lexeme: identifier,
@@ -112,7 +139,7 @@ fn parse_line(line: &str, line_number: usize) -> Result<Vec<Token>, String> {
                 });
             }
             '0'..='9' => {
-                let number = parse_number(&mut chars, line_number)?;
+                let number = lex_number(&mut chars, line_number)?;
                 tokens.push(Token {
                     token_type: TokenType::Number,
                     lexeme: number,
@@ -200,15 +227,15 @@ fn parse_line(line: &str, line_number: usize) -> Result<Vec<Token>, String> {
                 });
             }
             _ => {
-                // Skip unrecognized characters
-                println!("Unrecognized character: '{}'", chars.next().unwrap());
+                let unrecognized_char = chars.next().unwrap_or('?');
+                return Err(LexError::InvalidCharacter(unrecognized_char, line_number));
             }
         }
     }
     Ok(tokens)
 }
 
-fn parse_identifier(chars: &mut Peekable<Chars>) -> String {
+fn lex_identifier(chars: &mut Peekable<Chars>) -> String {
     let mut identifier = String::new();
     while let Some(&c) = chars.peek() {
         if c.is_alphanumeric() || c == '_' {
@@ -221,15 +248,13 @@ fn parse_identifier(chars: &mut Peekable<Chars>) -> String {
     identifier
 }
 
-fn parse_number(chars: &mut Peekable<Chars>, line_number: usize) -> Result<String, String> {
+fn lex_number(chars: &mut Peekable<Chars>, line_number: usize) -> Result<String, LexError> {
     let mut number: String = String::new();
+    let mut valid = true;
     while let Some(&c) = chars.peek() {
         if c.is_digit(10) || c == '.' {
             if c == '.' && number.contains('.') {
-                return Err(format!(
-                    "Line {}: Invalid number format: multiple decimal points",
-                    line_number
-                ));
+                valid = false;
             }
             number.push(c);
             chars.next();
@@ -237,10 +262,13 @@ fn parse_number(chars: &mut Peekable<Chars>, line_number: usize) -> Result<Strin
             break;
         }
     }
+    if !valid {
+        return Err(LexError::InvalidNumberFormat(number, line_number));
+    }
     Ok(number)
 }
 
-fn parse_keywords(tokens: &mut Vec<Token>) {
+fn lex_keywords(tokens: &mut Vec<Token>) {
     for token in tokens {
         if token.token_type == TokenType::Identifier {
             token.token_type = match token.lexeme.as_str() {
