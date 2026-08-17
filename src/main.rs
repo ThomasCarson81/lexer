@@ -68,8 +68,10 @@ impl fmt::Display for TokenType {
 }
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        println!("Please provide 1 file to tokenise");
+    if args.len() != 2 && args.len() != 3 {
+        println!(
+            "Please provide a file to tokenise, and optionally an output file to write the tokens to."
+        );
         return;
     }
     let mut all_tokens: Vec<Token> = Vec::new();
@@ -86,7 +88,11 @@ fn main() {
     });
     parse_keywords(&mut all_tokens);
 
-    print_tokens(&all_tokens);
+    if args.len() == 3 {
+        output_tokens(&all_tokens, &args[2]);
+    } else {
+        print_tokens(&all_tokens);
+    }
 }
 
 fn parse_line(line: &str, line_number: usize) -> Vec<Token> {
@@ -247,4 +253,14 @@ fn print_tokens(tokens: &Vec<Token>) {
     for token in tokens {
         println!("{}: {} ({})", token.line, token.token_type, token.lexeme)
     }
+}
+fn output_tokens(tokens: &Vec<Token>, output_file: &str) {
+    let mut output = String::new();
+    for token in tokens {
+        output.push_str(&format!(
+            "{},{},{}\n",
+            token.line, token.token_type, token.lexeme
+        ));
+    }
+    fs::write(output_file, output).expect("Unable to write to file");
 }
