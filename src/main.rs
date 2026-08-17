@@ -1,3 +1,4 @@
+use std::env;
 use std::fmt;
 use std::fs;
 use std::iter::Peekable;
@@ -66,8 +67,13 @@ impl fmt::Display for TokenType {
     }
 }
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        println!("Please provide 1 file to tokenise");
+        return;
+    }
     let mut all_tokens: Vec<Token> = Vec::new();
-    let file_content = fs::read_to_string("testfile.txt").expect("failed to read file");
+    let file_content = fs::read_to_string(&args[1]).expect("failed to read file");
     let content_lines = file_content.lines();
     let total_lines = content_lines.clone().count();
     for (i, line) in content_lines.enumerate() {
@@ -239,6 +245,6 @@ fn parse_keywords(tokens: &mut Vec<Token>) {
 
 fn print_tokens(tokens: &Vec<Token>) {
     for token in tokens {
-        print!("{}: {} ({}) ", token.line, token.token_type, token.lexeme)
+        println!("{}: {} ({})", token.line, token.token_type, token.lexeme)
     }
 }
