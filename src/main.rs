@@ -79,7 +79,7 @@ fn main() {
     let content_lines = file_content.lines();
     let total_lines = content_lines.clone().count();
     for (i, line) in content_lines.enumerate() {
-        all_tokens.extend(parse_line(line, i + 1));
+        all_tokens.extend(parse_line(line, i + 1).unwrap());
     }
     all_tokens.push(Token {
         token_type: TokenType::EndOfFile,
@@ -95,7 +95,7 @@ fn main() {
     }
 }
 
-fn parse_line(line: &str, line_number: usize) -> Vec<Token> {
+fn parse_line(line: &str, line_number: usize) -> Result<Vec<Token>, String> {
     let mut tokens: Vec<Token> = Vec::new();
     let mut chars = line.chars().peekable();
     while let Some(&c) = chars.peek() {
@@ -112,7 +112,7 @@ fn parse_line(line: &str, line_number: usize) -> Vec<Token> {
                 });
             }
             '0'..='9' => {
-                let number = parse_number(&mut chars);
+                let number = parse_number(&mut chars, line_number)?;
                 tokens.push(Token {
                     token_type: TokenType::Number,
                     lexeme: number,
@@ -205,7 +205,7 @@ fn parse_line(line: &str, line_number: usize) -> Vec<Token> {
             }
         }
     }
-    tokens
+    Ok(tokens)
 }
 
 fn parse_identifier(chars: &mut Peekable<Chars>) -> String {
@@ -221,17 +221,23 @@ fn parse_identifier(chars: &mut Peekable<Chars>) -> String {
     identifier
 }
 
-fn parse_number(chars: &mut Peekable<Chars>) -> String {
+fn parse_number(chars: &mut Peekable<Chars>, line_number: usize) -> Result<String, String> {
     let mut number: String = String::new();
     while let Some(&c) = chars.peek() {
-        if c.is_digit(10) {
+        if c.is_digit(10) || c == '.' {
+            if c == '.' && number.contains('.') {
+                return Err(format!(
+                    "Line {}: Invalid number format: multiple decimal points",
+                    line_number
+                ));
+            }
             number.push(c);
             chars.next();
         } else {
             break;
         }
     }
-    number
+    Ok(number)
 }
 
 fn parse_keywords(tokens: &mut Vec<Token>) {
