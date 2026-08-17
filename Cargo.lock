@@ -3,5 +3,12 @@
 version = 4
 
 [[package]]
-name = "tokeniser"
+name = "lexer"
+version = "0.1.0"
+dependencies = [
+ "syntax",
+]
+
+[[package]]
+name = "syntax"
 version = "0.1.0"
