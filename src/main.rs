@@ -125,6 +125,22 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
                     line: line_number,
                 });
             }
+            '>' => {
+                chars.next();
+                tokens.push(Token {
+                    token_type: TokenType::GreaterThan,
+                    lexeme: String::from(">"),
+                    line: line_number,
+                })
+            }
+            '<' => {
+                chars.next();
+                tokens.push(Token {
+                    token_type: TokenType::LessThan,
+                    lexeme: String::from("<"),
+                    line: line_number,
+                })
+            }
             '(' => {
                 chars.next();
                 tokens.push(Token {
