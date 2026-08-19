@@ -66,7 +66,7 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
     let mut chars = line.chars().peekable();
     while let Some(&c) = chars.peek() {
         match c {
-            ' ' | '\n' => {
+            ' ' | '\n' | '\t' => {
                 chars.next();
             }
             'a'..='z' | 'A'..='Z' => {
