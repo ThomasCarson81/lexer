@@ -87,59 +87,155 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
             }
             '=' => {
                 chars.next();
-                tokens.push(Token {
-                    token_type: TokenType::Equals,
-                    lexeme: String::from("="),
-                    line: line_number,
-                });
+                if *chars.peek().unwrap() == '=' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::EqualTo,
+                        lexeme: String::from("=="),
+                        line: line_number,
+                    });
+                } else {
+                    tokens.push(Token {
+                        token_type: TokenType::Equals,
+                        lexeme: String::from("="),
+                        line: line_number,
+                    });
+                }
             }
             '+' => {
                 chars.next();
-                tokens.push(Token {
-                    token_type: TokenType::Plus,
-                    lexeme: String::from("+"),
-                    line: line_number,
-                });
+                let next = chars.peek().unwrap();
+                if *next == '+' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::Increment,
+                        lexeme: String::from("++"),
+                        line: line_number,
+                    });
+                } else if *next == '=' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::PlusEquals,
+                        lexeme: String::from("+="),
+                        line: line_number,
+                    });
+                } else {
+                    tokens.push(Token {
+                        token_type: TokenType::Plus,
+                        lexeme: String::from("+"),
+                        line: line_number,
+                    });
+                }
             }
             '-' => {
                 chars.next();
-                tokens.push(Token {
-                    token_type: TokenType::Minus,
-                    lexeme: String::from("-"),
-                    line: line_number,
-                });
+                let next = chars.peek().unwrap();
+                if *next == '-' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::Decrement,
+                        lexeme: String::from("--"),
+                        line: line_number,
+                    });
+                } else if *next == '=' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::MinusEquals,
+                        lexeme: String::from("-="),
+                        line: line_number,
+                    });
+                } else {
+                    tokens.push(Token {
+                        token_type: TokenType::Minus,
+                        lexeme: String::from("-"),
+                        line: line_number,
+                    });
+                }
             }
             '*' => {
                 chars.next();
-                tokens.push(Token {
-                    token_type: TokenType::Asterisk,
-                    lexeme: String::from("*"),
-                    line: line_number,
-                });
+                if *chars.peek().unwrap() == '=' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::AsteriskEquals,
+                        lexeme: String::from("*="),
+                        line: line_number,
+                    })
+                } else {
+                    tokens.push(Token {
+                        token_type: TokenType::Asterisk,
+                        lexeme: String::from("*"),
+                        line: line_number,
+                    });
+                }
             }
             '/' => {
                 chars.next();
-                tokens.push(Token {
-                    token_type: TokenType::Slash,
-                    lexeme: String::from("/"),
-                    line: line_number,
-                });
+                if *chars.peek().unwrap() == '=' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::SlashEquals,
+                        lexeme: String::from("/="),
+                        line: line_number,
+                    })
+                } else {
+                    tokens.push(Token {
+                        token_type: TokenType::Slash,
+                        lexeme: String::from("/"),
+                        line: line_number,
+                    });
+                }
             }
             '>' => {
                 chars.next();
-                tokens.push(Token {
-                    token_type: TokenType::GreaterThan,
-                    lexeme: String::from(">"),
-                    line: line_number,
-                })
+                if *chars.peek().unwrap() == '=' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::GreaterThanOrEqualTo,
+                        lexeme: String::from(">="),
+                        line: line_number,
+                    })
+                } else {
+                    tokens.push(Token {
+                        token_type: TokenType::GreaterThan,
+                        lexeme: String::from(">"),
+                        line: line_number,
+                    });
+                }
             }
             '<' => {
                 chars.next();
-                tokens.push(Token {
-                    token_type: TokenType::LessThan,
-                    lexeme: String::from("<"),
-                    line: line_number,
-                })
+                if *chars.peek().unwrap() == '=' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::LessThanOrEqualTo,
+                        lexeme: String::from("<="),
+                        line: line_number,
+                    })
+                } else {
+                    tokens.push(Token {
+                        token_type: TokenType::LessThan,
+                        lexeme: String::from("<"),
+                        line: line_number,
+                    });
+                }
+            }
+            '!' => {
+                chars.next();
+                if *chars.peek().unwrap() == '=' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::NotEqualTo,
+                        lexeme: String::from("!="),
+                        line: line_number,
+                    })
+                } else {
+                    tokens.push(Token {
+                        token_type: TokenType::Not,
+                        lexeme: String::from("!"),
+                        line: line_number,
+                    })
+                }
             }
             '(' => {
                 chars.next();
