@@ -9,6 +9,7 @@ enum LexError {
     InvalidCharacter(char, usize),
     InvalidNumberFormat(String, usize),
     CouldNotReadFile(String),
+    TokenStreamEnded,
 }
 
 fn main() {
@@ -31,6 +32,9 @@ fn main() {
                 }
                 LexError::CouldNotReadFile(msg) => {
                     println!("Could not read file: {}", msg);
+                }
+                LexError::TokenStreamEnded => {
+                    println!("Token stream ended unexpectedly.")
                 }
             }
             return;
@@ -87,7 +91,7 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
             }
             '=' => {
                 chars.next();
-                if *chars.peek().unwrap() == '=' {
+                if *chars.peek().ok_or(LexError::TokenStreamEnded)? == '=' {
                     chars.next();
                     tokens.push(Token {
                         token_type: TokenType::EqualTo,
@@ -104,7 +108,7 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
             }
             '+' => {
                 chars.next();
-                let next = chars.peek().unwrap();
+                let next = chars.peek().ok_or(LexError::TokenStreamEnded)?;
                 if *next == '+' {
                     chars.next();
                     tokens.push(Token {
@@ -129,7 +133,7 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
             }
             '-' => {
                 chars.next();
-                let next = chars.peek().unwrap();
+                let next = chars.peek().ok_or(LexError::TokenStreamEnded)?;
                 if *next == '-' {
                     chars.next();
                     tokens.push(Token {
@@ -154,7 +158,7 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
             }
             '*' => {
                 chars.next();
-                if *chars.peek().unwrap() == '=' {
+                if *chars.peek().ok_or(LexError::TokenStreamEnded)? == '=' {
                     chars.next();
                     tokens.push(Token {
                         token_type: TokenType::AsteriskEquals,
@@ -171,7 +175,7 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
             }
             '/' => {
                 chars.next();
-                if *chars.peek().unwrap() == '=' {
+                if *chars.peek().ok_or(LexError::TokenStreamEnded)? == '=' {
                     chars.next();
                     tokens.push(Token {
                         token_type: TokenType::SlashEquals,
@@ -188,7 +192,7 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
             }
             '>' => {
                 chars.next();
-                if *chars.peek().unwrap() == '=' {
+                if *chars.peek().ok_or(LexError::TokenStreamEnded)? == '=' {
                     chars.next();
                     tokens.push(Token {
                         token_type: TokenType::GreaterThanOrEqualTo,
@@ -205,7 +209,7 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
             }
             '<' => {
                 chars.next();
-                if *chars.peek().unwrap() == '=' {
+                if *chars.peek().ok_or(LexError::TokenStreamEnded)? == '=' {
                     chars.next();
                     tokens.push(Token {
                         token_type: TokenType::LessThanOrEqualTo,
@@ -222,7 +226,7 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
             }
             '!' => {
                 chars.next();
-                if *chars.peek().unwrap() == '=' {
+                if *chars.peek().ok_or(LexError::TokenStreamEnded)? == '=' {
                     chars.next();
                     tokens.push(Token {
                         token_type: TokenType::NotEqualTo,
