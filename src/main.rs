@@ -241,6 +241,28 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
                     })
                 }
             }
+            '&' => {
+                chars.next();
+                if *chars.peek().ok_or(LexError::TokenStreamEnded)? == '&' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::LogicalAnd,
+                        lexeme: String::from("&&"),
+                        line: line_number,
+                    })
+                }
+            }
+            '|' => {
+                chars.next();
+                if *chars.peek().ok_or(LexError::TokenStreamEnded)? == '|' {
+                    chars.next();
+                    tokens.push(Token {
+                        token_type: TokenType::LogicalOr,
+                        lexeme: String::from("||"),
+                        line: line_number,
+                    })
+                }
+            }
             '(' => {
                 chars.next();
                 tokens.push(Token {
