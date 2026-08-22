@@ -363,9 +363,9 @@ fn lex_keywords(tokens: &mut Vec<Token>) {
                 "for" => TokenType::For,
                 "while" => TokenType::While,
                 "fn" => TokenType::Fn,
-                "Return" => TokenType::Return,
-                "Break" => TokenType::Break,
-                "Continue" => TokenType::Continue,
+                "return" => TokenType::Return,
+                "break" => TokenType::Break,
+                "continue" => TokenType::Continue,
                 _ => TokenType::Identifier,
             }
         }
