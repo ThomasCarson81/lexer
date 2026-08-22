@@ -354,6 +354,7 @@ fn lex_keywords(tokens: &mut Vec<Token>) {
                 "else" => TokenType::ElseTok,
                 "for" => TokenType::ForTok,
                 "while" => TokenType::WhileTok,
+                "fn" => TokenType::FnTok,
                 _ => TokenType::Identifier,
             }
         }
