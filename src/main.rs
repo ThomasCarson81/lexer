@@ -357,12 +357,15 @@ fn lex_keywords(tokens: &mut Vec<Token>) {
     for token in tokens {
         if token.token_type == TokenType::Identifier {
             token.token_type = match token.lexeme.as_str() {
-                "let" => TokenType::LetTok,
-                "if" => TokenType::IfTok,
-                "else" => TokenType::ElseTok,
-                "for" => TokenType::ForTok,
-                "while" => TokenType::WhileTok,
-                "fn" => TokenType::FnTok,
+                "let" => TokenType::Let,
+                "if" => TokenType::If,
+                "else" => TokenType::Else,
+                "for" => TokenType::For,
+                "while" => TokenType::While,
+                "fn" => TokenType::Fn,
+                "Return" => TokenType::Return,
+                "Break" => TokenType::Break,
+                "Continue" => TokenType::Continue,
                 _ => TokenType::Identifier,
             }
         }
