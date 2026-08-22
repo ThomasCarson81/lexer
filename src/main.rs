@@ -303,6 +303,14 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
                     line: line_number,
                 });
             }
+            ',' => {
+                chars.next();
+                tokens.push(Token {
+                    token_type: TokenType::Comma,
+                    lexeme: String::from(","),
+                    line: line_number,
+                });
+            }
             _ => {
                 let unrecognized_char = chars.next().unwrap_or('?');
                 return Err(LexError::InvalidCharacter(unrecognized_char, line_number));
