@@ -18,7 +18,7 @@ fn main() {
         println!(
             "Please provide a file to tokenise, and optionally an output file to write the tokens to."
         );
-        return;
+        std::process::exit(1);
     }
     let tokens = match lex_file(&args[1]) {
         Ok(tokens) => tokens,
@@ -37,7 +37,7 @@ fn main() {
                     println!("Token stream ended unexpectedly.")
                 }
             }
-            return;
+            std::process::exit(1);
         }
     };
     if args.len() == 3 {
