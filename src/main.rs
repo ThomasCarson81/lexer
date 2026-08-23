@@ -370,6 +370,7 @@ fn lex_keywords(tokens: &mut Vec<Token>) {
                 "continue" => TokenType::Continue,
                 "true" => TokenType::True,
                 "false" => TokenType::False,
+                "scope" => TokenType::Scope,
                 _ => TokenType::Identifier,
             }
         }
