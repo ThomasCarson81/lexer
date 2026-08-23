@@ -182,6 +182,8 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
                         lexeme: String::from("/="),
                         line: line_number,
                     })
+                } else if *chars.peek().ok_or(LexError::TokenStreamEnded)? == '/' {
+                    return Ok(tokens); // skip the rest of the line
                 } else {
                     tokens.push(Token {
                         token_type: TokenType::Slash,
