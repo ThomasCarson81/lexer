@@ -8,6 +8,7 @@ use syntax::{Token, TokenType};
 enum LexError {
     InvalidCharacter(char, usize),
     InvalidNumberFormat(String, usize),
+    UnterminatedString(usize),
     CouldNotReadFile(String),
     TokenStreamEnded,
 }
@@ -25,13 +26,16 @@ fn main() {
         Err(e) => {
             match e {
                 LexError::InvalidCharacter(c, line) => {
-                    println!("Line {}: Invalid character: '{}'", line, c);
+                    println!("Line {line}: Invalid character: '{c}'");
                 }
                 LexError::InvalidNumberFormat(num, line) => {
-                    println!("Line {}: Invalid number format: {}", line, num);
+                    println!("Line {line}: Invalid number format: {num}");
+                }
+                LexError::UnterminatedString(line) => {
+                    println!("Line {line}: unteriminated string literal.")
                 }
                 LexError::CouldNotReadFile(msg) => {
-                    println!("Could not read file: {}", msg);
+                    println!("Could not read file: {msg}");
                 }
                 LexError::TokenStreamEnded => {
                     println!("Token stream ended unexpectedly.")
@@ -313,6 +317,14 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
                     line: line_number,
                 });
             }
+            '"' => {
+                let string_literal = lex_string(&mut chars, line_number)?;
+                tokens.push(Token {
+                    token_type: TokenType::String,
+                    lexeme: string_literal,
+                    line: line_number,
+                });
+            }
             _ => {
                 let unrecognized_char = chars.next().unwrap_or('?');
                 return Err(LexError::InvalidCharacter(unrecognized_char, line_number));
@@ -353,6 +365,25 @@ fn lex_number(chars: &mut Peekable<Chars>, line_number: usize) -> Result<String,
         return Err(LexError::InvalidNumberFormat(number, line_number));
     }
     Ok(number)
+}
+
+fn lex_string(chars: &mut Peekable<Chars>, line_number: usize) -> Result<String, LexError> {
+    let mut str_lit: String = String::new();
+    chars.next(); // consume first "
+    let mut ended: bool = false;
+    while let Some(&c) = chars.peek() {
+        if c == '"' {
+            chars.next();
+            ended = true;
+            break;
+        }
+        str_lit.push(c);
+        chars.next();
+    }
+    if !ended {
+        return Err(LexError::UnterminatedString(line_number));
+    }
+    Ok(str_lit)
 }
 
 fn lex_keywords(tokens: &mut Vec<Token>) {
