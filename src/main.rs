@@ -45,7 +45,16 @@ fn main() {
         }
     };
     if args.len() == 3 {
-        output_tokens(&tokens, &args[2]);
+        let json_result = serde_json::to_string_pretty(&tokens);
+        match json_result {
+            Ok(json) => {
+                output_tokens(&json, &args[2]);
+            }
+            Err(e) => {
+                println!("Error serialising AST JSON: {}", e);
+                std::process::exit(1);
+            }
+        }
     } else {
         print_tokens(&tokens);
     }
@@ -413,13 +422,6 @@ fn print_tokens(tokens: &Vec<Token>) {
         println!("{}: {} ({})", token.line, token.token_type, token.lexeme)
     }
 }
-fn output_tokens(tokens: &Vec<Token>, output_file: &str) {
-    let mut output = String::new();
-    for token in tokens {
-        output.push_str(&format!(
-            "{},{},{}\n",
-            token.line, token.token_type, token.lexeme
-        ));
-    }
-    fs::write(output_file, output).expect("Unable to write to file");
+fn output_tokens(json: &str, output_file: &str) {
+    fs::write(output_file, json).expect("Unable to write to file");
 }
