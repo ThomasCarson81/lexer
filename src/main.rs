@@ -35,7 +35,7 @@ fn main() {
                     println!("Line {line}: unteriminated string literal.")
                 }
                 LexError::CouldNotReadFile(msg) => {
-                    println!("Could not read file: {msg}");
+                    println!("Lexer could not read file: {msg}");
                 }
                 LexError::TokenStreamEnded => {
                     println!("Token stream ended unexpectedly.")
