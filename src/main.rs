@@ -75,7 +75,6 @@ fn lex_file(file_path: &str) -> Result<Vec<Token>, LexError> {
         line: total_lines,
     });
     lex_keywords(&mut all_tokens);
-    lex_type_names(&mut all_tokens);
     Ok(all_tokens)
 }
 
@@ -497,18 +496,6 @@ fn lex_keywords(tokens: &mut Vec<Token>) {
                 "mut" => TokenType::Mut,
 
                 _ => TokenType::Identifier,
-            }
-        }
-    }
-}
-
-fn lex_type_names(tokens: &mut Vec<Token>) {
-    for token in tokens {
-        if token.token_type == TokenType::Identifier {
-            token.token_type = match token.lexeme.as_str() {
-                "u8" | "u16" | "u32" | "u64" | "i8" | "i16" | "i32" | "i64" | "f32" | "f64"
-                | "string" | "bool" | "unit" => TokenType::TypeName,
-                _ => token.token_type,
             }
         }
     }
