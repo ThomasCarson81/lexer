@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::iter::Peekable;
 use std::str::Chars;
-use syntax::ast::{Token, TokenType};
+use syntax::tokens::{Token, TokenType};
 
 #[derive(Debug)]
 enum LexError {
