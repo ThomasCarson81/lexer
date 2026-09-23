@@ -494,6 +494,8 @@ fn lex_keywords(tokens: &mut Vec<Token>) {
                 "false" => TokenType::False,
                 "scope" => TokenType::Scope,
                 "mut" => TokenType::Mut,
+                "struct" => TokenType::Struct,
+                "enum" => TokenType::Enum,
 
                 _ => TokenType::Identifier,
             }
