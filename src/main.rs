@@ -408,6 +408,14 @@ fn lex_line(line: &str, line_number: usize) -> Result<Vec<Token>, LexError> {
                     line: line_number,
                 });
             }
+            '.' => {
+                chars.next();
+                tokens.push(Token {
+                    token_type: TokenType::Dot,
+                    lexeme: String::from("."),
+                    line: line_number,
+                });
+            }
             '"' => {
                 let string_literal = lex_string(&mut chars, line_number)?;
                 tokens.push(Token {
